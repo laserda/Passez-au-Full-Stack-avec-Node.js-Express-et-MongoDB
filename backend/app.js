@@ -1,5 +1,5 @@
 const express = require("express");
-
+const path = require('path');
 const dbConnection = require("./data/Connection");
 
 const stuffRouter = require("./routes/stuff");
@@ -18,6 +18,7 @@ app.use((req, res, next) => {
     next();
 });
 
+app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use("/api/stuff", stuffRouter);
 app.use("/api/auth", userRouter);
 
