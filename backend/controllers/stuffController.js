@@ -1,6 +1,6 @@
 
 const Thing = require("../models/Thing");
-
+const fs = require('fs');
 
 exports.save = (req, res, next) => {
     const thingObject = JSON.parse(req.body.thing);
@@ -59,8 +59,25 @@ exports.updateStuff = (req, res, next) => {
 }
 
 exports.deleteOneStuff = (req, res, next) => {
-    Thing.deleteOne({ _id: req.params.id })
-        .then((thing) => res.status(200).json({ message: "Object supprime" }))
-        .catch(error => res.status(400).json({ error }));
+    console.log("1 - Test");
+    Thing.findOne({ _id: req.params.id})
+       .then(thing => {
+        console.log("2 - Test");
+           if (thing.userId != req.auth.userId) {
+            console.log("3 - Test");
+               res.status(401).json({message: 'Not authorized'});
+           } else {
+            console.log("4 - Test");
+               const filename = thing.imageUrl.split('/images/')[1];
+               fs.unlink(`images/${filename}`, () => {
+                   Thing.deleteOne({_id: req.params.id})
+                       .then(() => { res.status(200).json({message: 'Objet supprimé !'})})
+                       .catch(error => res.status(401).json({ error }));
+               });
+           }
+       })
+       .catch( error => {
+           res.status(500).json({ error });
+       });
 
 }
